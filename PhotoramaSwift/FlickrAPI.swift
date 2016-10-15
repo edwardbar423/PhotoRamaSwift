@@ -30,7 +30,7 @@ enum FlickrError: Error {
 
 struct FlickrAPI {
     
-   private static let baseURLString = "https://api.flickr.com/services/rest"
+    private static let baseURLString = "https://api.flickr.com/services/rest"
     private static let APIKey = "a6d819499131071f158fd740860a5a88"
     
     private static let dateFormatter: DateFormatter = {
@@ -98,8 +98,9 @@ struct FlickrAPI {
         do {
             let jsonObject: Any = try JSONSerialization.jsonObject(with: data, options: [])
             
-            guard let jsonDictionary = jsonObject as? [String: AnyObject],
-            let photos = jsonDictionary["photos"] as? [String: AnyObject],
+            guard let
+                jsonDictionary = jsonObject as? [String: AnyObject],
+                let photos = jsonDictionary["photos"] as? [String: AnyObject],
                 let photosArray = photos["photo"] as? [[String: AnyObject]] else {
                     return .Failure(FlickrError.InvalidJSONData)
             }
