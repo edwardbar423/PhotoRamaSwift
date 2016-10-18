@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  PhotosViewController.swift
 //  PhotoramaSwift
 //
 //  Created by Andrew Barber on 10/12/16.
@@ -27,20 +27,12 @@ class PhotosViewController: UIViewController, UICollectionViewDelegate {
             
             (PhotosResult) -> Void in
             
+            let sortByDateTaken = NSSortDescriptor(key: "dateTaken", ascending: true)
+            let allPhotos = try! self.store.fetchMainQueuePhotos(predicate: nil,
+            sortDescriptors: [sortByDateTaken])
+            
             OperationQueue.main.addOperation() {
-                
-                switch PhotosResult {
-                case let .Success(photos):
-                    print("😀Successfully found \(photos.count) recent photos.")
-                    self.photoDataSource.photos = photos
-                    
-                case let .Failure(error):
-                    self.photoDataSource.photos.removeAll()
-                    print("🚫Error fetching recent photos: \(error)")
-                    
-                    
-                    
-                }
+                self.photoDataSource.photos = allPhotos
                 self.collectionView.reloadSections(IndexSet(integer: 0))
             }
             
