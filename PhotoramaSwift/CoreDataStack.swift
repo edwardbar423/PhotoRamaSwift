@@ -49,8 +49,23 @@ class CoreDataStack {
     }()
     
     func saveChanges() throws {
-        
         var error : Error?
+        
+        privateQueueContext.performAndWait {
+            if self.privateQueueContext.hasChanges {
+                do {
+                    try self.privateQueueContext.save()
+                }
+                catch let saveError {
+                    error = saveError
+                }
+            }
+        }
+        
+        if let error = error {
+            throw error
+        }
+        
         mainQueueContext.performAndWait() {
             
             if self.mainQueueContext.hasChanges {
@@ -67,6 +82,15 @@ class CoreDataStack {
             throw error
         }
     }
+    
+    lazy var privateQueueContext: NSManagedObjectContext = {
+        
+        let moc = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        moc.parent = self.mainQueueContext
+        moc.name = "Primary Private Queue Context"
+        
+        return moc
+    }()
     
 }
 

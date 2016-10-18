@@ -100,6 +100,30 @@ class PhotoStore {
         return .Success(image)
     }
     
+    
+    func fetchMainQueueTags(predicate: NSPredicate? = nil,
+                            sortDescriptors: [NSSortDescriptor]? = nil) throws -> [NSManagedObject] {
+        let fetchRequest : NSFetchRequest<Tag> = Tag.fetchRequest()
+        fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = sortDescriptors
+        
+        let mainQueueContext = self.coreDataStack.mainQueueContext
+        var mainQueueTags: [NSManagedObject]?
+        var fetchRequestError: Error?
+        mainQueueContext.performAndWait({
+            do {
+                mainQueueTags = try mainQueueContext.fetch(fetchRequest)
+            } catch let error {
+                fetchRequestError = error
+            }
+        })
+        guard let tags = mainQueueTags else {
+            throw fetchRequestError!
+        }
+        return tags
+    }
+    
+    
     func fetchRecentPhotos(completion: @escaping (PhotosResult) -> Void) {
         
         let url = FlickrAPI.recentPhotosURL()
@@ -112,9 +136,9 @@ class PhotoStore {
             
             if case let .Success(photos) = result {
                 
-                let mainQueueContext = self.coreDataStack.mainQueueContext
-                mainQueueContext.performAndWait() {
-                    try! mainQueueContext.obtainPermanentIDs(for: photos)
+                let privateQueueContext = self.coreDataStack.privateQueueContext
+                privateQueueContext.performAndWait() {
+                    try! privateQueueContext.obtainPermanentIDs(for: photos)
                 }
                 
                 let objectIDs = photos.map{ $0.objectID }
@@ -145,7 +169,7 @@ class PhotoStore {
             return .Failure(error!)
             
         }
-        return FlickrAPI.photosFromJSONData(data: jsonData, inContext: self.coreDataStack.mainQueueContext)
+        return FlickrAPI.photosFromJSONData(data: jsonData, inContext: self.coreDataStack.privateQueueContext)
     }
     
 }

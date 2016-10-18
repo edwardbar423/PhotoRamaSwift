@@ -40,6 +40,8 @@ class PhotosViewController: UIViewController, UICollectionViewDelegate {
         
     }
 
+
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowPhoto" {
             
@@ -52,6 +54,8 @@ class PhotosViewController: UIViewController, UICollectionViewDelegate {
             }
         }
     }
+    
+   
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let photo = photoDataSource.photos[indexPath.row]
